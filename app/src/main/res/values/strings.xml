@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">nsign_media</string>
+
+    <string name="async_notifications_message">Mensaje</string>
 </resources>
