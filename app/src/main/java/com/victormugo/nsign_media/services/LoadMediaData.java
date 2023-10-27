@@ -21,6 +21,8 @@ import com.victormugo.nsign_media.api.models.VoMedia;
 import com.victormugo.nsign_media.api.models.VoResource;
 import com.victormugo.nsign_media.utils.Utils;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -83,6 +85,8 @@ public class LoadMediaData extends Service {
 
             Log.d(Core.TAG, "-----------> resource: " + resource);
             Log.d(Core.TAG, "-----------> duration: " + resource.getDuration());
+
+            EventBus.getDefault().post(resource);
 
             reScheduleTimer(resource.getDuration());
         }
