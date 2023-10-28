@@ -76,10 +76,12 @@ public class LoadMediaData extends Service {
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     Log.d(Core.TAG, "---------------------------> response: " + response);
 
-                    boolean resp = Utils.writeResponseBodyToDisk(getApplicationContext(), response.body());
-                    Log.d(Core.TAG, "--------------------------> resp: " + resp);
+                    if (response.body() != null) {
+                        boolean resp = Utils.writeResponseBodyToDisk(response.body());
+                        Log.d(Core.TAG, "--------------------------> resp: " + resp);
 
-                    activateServiceData();
+                        activateServiceData();
+                    }
                 }
 
                 @Override
@@ -116,11 +118,20 @@ public class LoadMediaData extends Service {
     public void activateServiceData() {
 
         // Cargar datos del fichero Assets en las clases correspondientes
-        voMedia = Utils.loadJSONFromAsset(getBaseContext());
+        voMedia = Utils.loadJSONFromAsset();
 
-        // Ejecutar el timerTask
-        Log.d(Core.TAG, "-------------------> voMedia.getPlaylists().get(0).getResources().get(0).getDuration(): " + voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
-        reScheduleTimer(voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
+        if (voMedia != null) {
+            // Ejecutar el timerTask
+            Log.d(Core.TAG, "-------------------> voMedia.getPlaylists().get(0).getResources().get(0).getDuration(): " + voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
+            reScheduleTimer(voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
+
+        } else {
+            // NO existe el fichero events.json. Cerrar la aplicación indicando el motivo
+            Log.d(Core.TAG, "----------------------> No ha encontrado el fichero events.json");
+
+            IntentServiceResult intentServiceResult = new IntentServiceResult(-1,-1,-1,-1, null);
+            EventBus.getDefault().post(intentServiceResult);
+        }
     }
 
     public void reScheduleTimer(long duration) {

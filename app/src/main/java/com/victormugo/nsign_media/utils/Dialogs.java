@@ -1,11 +1,13 @@
 package com.victormugo.nsign_media.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.victormugo.nsign_media.R;
+import com.victormugo.nsign_media.activities.Core;
 
 public class Dialogs {
 
@@ -36,6 +38,9 @@ public class Dialogs {
     }
 
     public static MaterialDialog.Builder showDialogProgress(String message, Context context) {
+
+        Log.d(Core.TAG, "-----------------------> Entra en showDialogProgress");
+
         try {
             MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
             builder.cancelable(false);
@@ -47,6 +52,7 @@ public class Dialogs {
             return builder;
 
         } catch (Exception e) {
+            Log.d(Core.TAG, "-------------------> e: " + e.getMessage());
             e.printStackTrace();
             return null;
         }

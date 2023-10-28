@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Intent;
@@ -29,13 +30,16 @@ import com.victormugo.nsign_media.utils.Dialogs;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int STORAGE_PERMISSION_CODE = 7;
-    private MaterialDialog dialog;
+
+    private MaterialDialog dialogProgress;
 
     private ActivityMainBinding binding;
 
@@ -59,16 +63,24 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         Log.d(Core.TAG, "-------------> entra en el onStart");
 
-        // Mostrar loading mientras se cargan los recursos
-        //binding.loading.setVisibility(View.VISIBLE);
-        dialog = Dialogs.showDialogProgress(getString(R.string.message_loading_content), MainActivity.this).build();
-        if (dialog != null) dialog.show();
+        // Mostrar mensaje al usuario en el ui mientras se realizan las verificaciones
+        dialogProgress = Dialogs.showDialogProgress(getString(R.string.message_loading_content), MainActivity.this).build();
+        if (dialogProgress != null) dialogProgress.show();
 
         binding.imageMedia.setVisibility(View.GONE);
         binding.videoMedia.setVisibility(View.GONE);
 
         // Verificar permisos
-        requestForStoragePermissions();
+        boolean permissions = checkStoragePermissions();
+        Log.d(Core.TAG, "------------------> permissions: " + permissions);
+
+        if (!permissions) {
+            // Activar permisos
+            requestForStoragePermissions();
+
+        } else {
+            activateMechanism();
+        }
     }
 
     @Override
@@ -102,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        Log.d(Core.TAG, "-----> Entra aqui solo cuando es android below 11");
+        Log.d(Core.TAG, "-----> Entra en onRequestPermissionsResult");
         Log.d(Core.TAG, "-----> requestCode: " + requestCode);
 
         if (requestCode == STORAGE_PERMISSION_CODE) {
@@ -113,16 +125,44 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
                 Dialogs.showMaterialDialog(getString(R.string.permission_storage_denied), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
-                // binding.loading.setVisibility(View.GONE);
-                if (dialog != null) dialog.dismiss();
+                if (dialogProgress != null) dialogProgress.dismiss();
             }
         }
     }
 
-    private void requestForStoragePermissions() {
+    /**
+     * Método para verificar permisos
+     * @return boolean
+     */
+    public boolean checkStoragePermissions() {
 
+        Log.d(Core.TAG, "------------------> Entra en checkStoragePermissions");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android is 11 (R) o superior
+            return Environment.isExternalStorageManager();
+
+        } else {
+            // Por debajo de Android 11
+            int write = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+            return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
+    /**
+     * Método para gestionar permisos de la aplicación
+     */
+    private void requestForStoragePermissions() {
+
+        Log.d(Core.TAG, "-----------------------> Entra en requestForStoragePermissions");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+            if (dialogProgress != null) dialogProgress.dismiss();
+
+            Log.d(Core.TAG, "-----------------------> Entra en requestForStoragePermissions superior a 11");
 
             // Android is 11 (R) o superior
             try {
@@ -153,22 +193,24 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> storageActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), o -> {
 
+        Log.d(Core.TAG, "--------> Entra en storageActivityResultLauncher");
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+            Log.d(Core.TAG, "------> Environment.isExternalStorageManager(): " + Environment.isExternalStorageManager());
 
             // Android is 11 (R) o superior
             if (Environment.isExternalStorageManager()) {
-                //Manage External Storage Permissions YES
-                Log.d(Core.TAG, "Above 11 ----- onActivityResult: Manage External Storage Permissions Granted");
+                // Manage External Storage Permissions YES
+                Log.d(Core.TAG, "------> Above 11 ----- onActivityResult: Manage External Storage Permissions Granted");
 
                 // Botón ON
-                activateMechanism();
+                // activateMechanism();
 
             } else {
                 // Mostrar mensaje al usuario de que si acepta el permiso, la aplicación no puede continuar
                 Dialogs.showMaterialDialog(getString(R.string.permission_storage_denied), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
-
-                // binding.loading.setVisibility(View.GONE);
-                if (dialog != null) dialog.dismiss();
+                if (dialogProgress != null) dialogProgress.dismiss();
             }
         }
     });
@@ -177,6 +219,8 @@ public class MainActivity extends AppCompatActivity {
      * Método para activar el proceso de ejecuciones de la aplicación
      */
     public void activateMechanism() {
+
+        Log.d(Core.TAG, "-------------------> Entra en activateMechanism");
 
         // Iniciar servicio
         Core.activateService(getBaseContext(), LoadMediaData.class);
@@ -189,6 +233,8 @@ public class MainActivity extends AppCompatActivity {
      * Método para desactivar las ejecuciones de la aplicación
      */
     public void desactivateMechanism() {
+
+        Log.d(Core.TAG, "-------------------> Entra en desactivateMechanism");
 
         // Finalizar servicio
         Core.finishService(getBaseContext(), LoadMediaData.class);
@@ -206,80 +252,93 @@ public class MainActivity extends AppCompatActivity {
 
         runOnUiThread(() -> {
 
+            if (dialogProgress != null) dialogProgress.dismiss();
+
             Log.d(Core.TAG, "-----------------> Entra en onEvent");
-            // binding.loading.setVisibility(View.GONE);
-            if (dialog != null) dialog.dismiss();
 
-            // Saber si es png o mp4
-            String[] separated = intentServiceResult.getResource().getName().split("\\.");
+            if (intentServiceResult.getResource() != null) {
 
-            if (separated[1].equals(Core.image)) {
-                // ------ IMAGEN ------
+                // Saber si es png o mp4
+                String[] separated = intentServiceResult.getResource().getName().split("\\.");
 
-                // Esconder vista del video
-                // Mostrar vista de imagen
-                binding.videoMedia.setVisibility(View.GONE);
-                binding.imageMedia.setVisibility(View.VISIBLE);
+                if (separated[1].equals(Core.image)) {
+                    // ------ IMAGEN ------
 
-                InputStream inputstream;
-                try {
-                    inputstream = getBaseContext().getAssets().open("media/" + intentServiceResult.getResource().getName());
-                    Drawable drawable = Drawable.createFromStream(inputstream, null);
+                    // Esconder vista del video
+                    // Mostrar vista de imagen
+                    binding.videoMedia.setVisibility(View.GONE);
+                    binding.imageMedia.setVisibility(View.VISIBLE);
 
-                    binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
-                    binding.imageMedia.getLayoutParams().height = intentServiceResult.getHeigh();
+                    InputStream inputstream;
+                    try {
+                        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
+                        inputstream = new FileInputStream(path);
+                        Drawable drawable = Drawable.createFromStream(inputstream, null);
 
-                    binding.imageMedia.setX(intentServiceResult.getX());
-                    binding.imageMedia.setY(intentServiceResult.getY());
+                        binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
+                        binding.imageMedia.getLayoutParams().height = intentServiceResult.getHeigh();
 
-                    binding.imageMedia.setImageDrawable(drawable);
+                        binding.imageMedia.setX(intentServiceResult.getX());
+                        binding.imageMedia.setY(intentServiceResult.getY());
 
-                    inputstream.close();
+                        binding.imageMedia.setImageDrawable(drawable);
 
-                } catch (IOException e) {
-                    Log.d(Core.TAG, "---------> e: " + e.getMessage());
-                    throw new RuntimeException(e);
-                }
+                        inputstream.close();
 
-            } else if (separated[1].equals(Core.video)) {
-                // ------ VIDEO ------
+                    } catch (IOException e) {
+                        Log.d(Core.TAG, "---------> e: " + e.getMessage());
+                        // Fichero no encontrado. Mostrar mensaje de error
+                        Dialogs.showMaterialDialog(getString(R.string.file_media_not_exists), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
 
-                // Esconder vista de la imagen
-                // Mostrar vista del video
-                binding.videoMedia.setVisibility(View.VISIBLE);
-                binding.imageMedia.setVisibility(View.GONE);
+                    } catch (Exception e1) {
+                        Log.d(Core.TAG, "---------> e1: " + e1.getMessage());
+                        e1.getMessage();
+                    }
 
-                try {
-                    Log.d(Core.TAG, "------------------> intentServiceResult.getResource().getName()).toString(): " + intentServiceResult.getResource().getName());
+                } else if (separated[1].equals(Core.video)) {
+                    // ------ VIDEO ------
 
-                    String name = separated[0];
+                    // Esconder vista de la imagen
+                    // Mostrar vista del video
+                    binding.videoMedia.setVisibility(View.VISIBLE);
+                    binding.imageMedia.setVisibility(View.GONE);
 
-                    name = name.toLowerCase(); // Cambiar todas las letras a minusculas
-                    name = name.replace(" ", "_"); // Cambiar todos los espacios en blanco a _
+                    try {
+                        Log.d(Core.TAG, "------------------> intentServiceResult.getResource().getName()).toString(): " + intentServiceResult.getResource().getName());
 
-                    Log.d(Core.TAG, "------------------> name: " + name);
+                        String name = separated[0];
 
-                    MediaController mediaController = new MediaController(this);
-                    binding.videoMedia.setMediaController(mediaController);
-                    String fileName = "android.resource://"+  getPackageName() + "/raw/" + name;
-                    Log.d(Core.TAG, "------------------> fileName: " + fileName);
-                    binding.videoMedia.setVideoURI(Uri.parse(fileName));
+                        name = name.toLowerCase(); // Cambiar todas las letras a minusculas
+                        name = name.replace(" ", "_"); // Cambiar todos los espacios en blanco a _
 
-                    binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
-                    binding.imageMedia.getLayoutParams().height = intentServiceResult.getHeigh();
+                        Log.d(Core.TAG, "------------------> name: " + name);
 
-                    binding.imageMedia.setX(intentServiceResult.getX());
-                    binding.imageMedia.setY(intentServiceResult.getY());
+                        MediaController mediaController = new MediaController(this);
+                        binding.videoMedia.setMediaController(mediaController);
+                        String fileName = "android.resource://" + getPackageName() + "/raw/" + name;
+                        Log.d(Core.TAG, "------------------> fileName: " + fileName);
+                        binding.videoMedia.setVideoURI(Uri.parse(fileName));
 
-                    binding.videoMedia.start();
+                        binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
+                        binding.imageMedia.getLayoutParams().height = intentServiceResult.getHeigh();
 
-                } catch (Exception e) {
-                    Log.d(Core.TAG, "-------------> e: " + e.getMessage());
-                    throw new RuntimeException(e);
+                        binding.imageMedia.setX(intentServiceResult.getX());
+                        binding.imageMedia.setY(intentServiceResult.getY());
+
+                        binding.videoMedia.start();
+
+                    } catch (Exception e) {
+                        Log.d(Core.TAG, "-------------> e: " + e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+
+                } else {
+                    // Formato o fichero events no reconocido
+                    Dialogs.showMaterialDialog(getString(R.string.file_media_not_exists), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
                 }
 
             } else {
-                // Formato no reconocido
+                Dialogs.showMaterialDialog(getString(R.string.file_config_not_exists), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
             }
 
         });

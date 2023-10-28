@@ -5,4 +5,7 @@
     <string name="image_content">Imagen</string>
     <string name="message_loading_content">Cargando contenido</string>
     <string name="permission_storage_denied">Permiso de Almacén denegado.\nEs necesario activarlo para el correcto funcionamiento de la aplicación.\n\nReinice la aplicación para activar el permiso solicitado.</string>
+
+    <string name="file_config_not_exists">Fichero de configuración no encontrado.\nCierre la aplicación y contacte con su administrador.</string>
+    <string name="file_media_not_exists">Fichero de contenido no encontrado.</string>
 </resources>

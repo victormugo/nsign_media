@@ -1,6 +1,5 @@
 package com.victormugo.nsign_media.utils;
 
-import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -11,7 +10,9 @@ import com.victormugo.nsign_media.api.models.VoPlaylists;
 import com.victormugo.nsign_media.api.models.VoResource;
 import com.victormugo.nsign_media.bus.IntentServiceResult;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,12 +27,14 @@ public class Utils {
      * Método para realizar la lectura del fichero events.json
      * @return VoMedia a partir del JSON events.json
      */
-    public static VoMedia loadJSONFromAsset(Context context) {
+    public static VoMedia loadJSONFromAsset() {
         VoMedia voMedia;
         String json;
 
         try {
-            InputStream is = context.getAssets().open("events.json");
+            // InputStream is = context.getAssets().open(Core.JSON_FILE);
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.JSON_FILE;  // fist part gets the directory of download folder and last part is your file name
+            InputStream is = new BufferedInputStream(new FileInputStream(path));
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -156,9 +159,8 @@ public class Utils {
     }
 
 
-    public static boolean writeResponseBodyToDisk(Context context, ResponseBody body) {
+    public static boolean writeResponseBodyToDisk(ResponseBody body) {
         try {
-            // todo change the file location/name according to your needs
             File futureStudioIconFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
 
             InputStream inputStream = null;
@@ -188,6 +190,16 @@ public class Utils {
                 }
 
                 outputStream.flush();
+
+                // Descomprimir fichero
+                final File rar = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
+                Log.d(Core.TAG, "------------------> rar: " + rar);
+
+                final File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator);
+                Log.d(Core.TAG, "-------------------> destinationFolder: " + destinationFolder);
+
+                // TODO
+                // Junrar.extract(rar, destinationFolder);
 
                 return true;
 
