@@ -1,7 +1,6 @@
 package com.victormugo.nsign_media.utils;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -9,6 +8,7 @@ import com.victormugo.nsign_media.activities.Core;
 import com.victormugo.nsign_media.api.models.VoMedia;
 import com.victormugo.nsign_media.api.models.VoPlaylists;
 import com.victormugo.nsign_media.api.models.VoResource;
+import com.victormugo.nsign_media.bus.IntentServiceResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +21,8 @@ public class Utils {
      * @return VoMedia a partir del JSON events.json
      */
     public static VoMedia loadJSONFromAsset(Context context) {
-        VoMedia voMedia = null;
-        String json = null;
+        VoMedia voMedia;
+        String json;
 
         try {
             InputStream is = context.getAssets().open("events.json");
@@ -52,24 +52,26 @@ public class Utils {
      * @param voMedia Clase media
      * @return VoResource
      */
-    public static VoResource loadNextMediaFile(VoMedia voMedia) {
+    public static IntentServiceResult loadNextMediaFile(VoMedia voMedia) {
 
         // Verificar que si todos los recursos se han mostrado, volver a inciarlizar
         verifyAllResourcesLoaded(voMedia);
 
         for (int i = 0; i<voMedia.getPlaylists().size(); i++) {
+            VoPlaylists voPlaylists = voMedia.getPlaylists().get(i);
 
-            Log.d(Core.TAG, "-----> id:" + voMedia.getPlaylists().get(i).getId());
-            Log.d(Core.TAG, "-----> width:" + voMedia.getPlaylists().get(i).getWidth());
+            Log.d(Core.TAG, "-----> id:" + voPlaylists.getId());
+            Log.d(Core.TAG, "-----> width:" + voPlaylists.getWidth());
 
-            for (int j = 0; j<voMedia.getPlaylists().get(i).getResources().size(); j++) {
+            for (int j = 0; j<voPlaylists.getResources().size(); j++) {
+                VoResource voResource = voPlaylists.getResources().get(j);
 
-               if (!voMedia.getPlaylists().get(i).getResources().get(j).isDone()) {
-                    Log.d(Core.TAG, "---------> name: " + voMedia.getPlaylists().get(i).getResources().get(j).getName());
+               if (!voResource.isDone()) {
+                    Log.d(Core.TAG, "---------> name: " + voResource.getName());
 
-                    voMedia.getPlaylists().get(i).getResources().get(j).setDone(true);
+                   voResource.setDone(true);
 
-                    return voMedia.getPlaylists().get(i).getResources().get(j);
+                   return new IntentServiceResult(voPlaylists.getX(), voPlaylists.getY(), voPlaylists.getWidth(), voPlaylists.getHeigh(), voResource);
                 }
             }
         }
@@ -85,21 +87,29 @@ public class Utils {
         int total = 0;
 
         for (int i = 0 ; i<voMedia.getPlaylists().size(); i++) {
+            VoPlaylists voPlaylists = voMedia.getPlaylists().get(i);
 
-            for (int j = 0; j<voMedia.getPlaylists().get(i).getResources().size(); j++) {
+            for (int j = 0; j<voPlaylists.getResources().size(); j++) {
                 total ++;
             }
         }
         return total;
     }
 
+    /**
+     * Método que devuelve si todos los recursos se han visualizado para volver a iniciar
+     * @param voMedia Clase media
+     * @return boolean
+     */
     public static boolean allResourcesDone(VoMedia voMedia) {
 
         for (int i = 0 ; i<voMedia.getPlaylists().size(); i++) {
+            VoPlaylists voPlaylists = voMedia.getPlaylists().get(i);
 
-            for (int j = 0; j<voMedia.getPlaylists().get(i).getResources().size(); j++) {
+            for (int j = 0; j<voPlaylists.getResources().size(); j++) {
+                VoResource voResource = voPlaylists.getResources().get(j);
 
-                if (!voMedia.getPlaylists().get(i).getResources().get(j).isDone()) {
+                if (!voResource.isDone()) {
                     return false;
                 }
             }
@@ -130,9 +140,11 @@ public class Utils {
     public static void inicializeMediaDone(VoMedia voMedia) {
 
         for (int i = 0 ; i<voMedia.getPlaylists().size(); i++) {
+            VoPlaylists voPlaylists = voMedia.getPlaylists().get(i);
 
             for (int j = 0; j < voMedia.getPlaylists().get(i).getResources().size(); j++) {
-                voMedia.getPlaylists().get(i).getResources().get(j).setDone(false);
+                VoResource voResource = voPlaylists.getResources().get(j);
+                voResource.setDone(false);
             }
         }
     }

@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.victormugo.nsign_media.services.LoadMediaData;
-
 public class Core {
 
     public static final String TAG  = "nsign_media";
-    public static final String URL_FILE  = "https://media.nsign.tv/media/NSIGN_Prueba_Android.rar";
 
+    public static final String image = "png";
+    public static final String video = "mp4";
+    public static final String URL_FILE  = "https://media.nsign.tv/media/NSIGN_Prueba_Android.rar";
 
     public static void activateService(Context context, Class<?> className) {
         boolean isRunning = isMyServiceRunning(className, context);

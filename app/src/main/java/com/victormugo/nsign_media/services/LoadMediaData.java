@@ -18,7 +18,9 @@ import com.victormugo.nsign_media.R;
 import com.victormugo.nsign_media.activities.Core;
 import com.victormugo.nsign_media.activities.MainActivity;
 import com.victormugo.nsign_media.api.models.VoMedia;
+import com.victormugo.nsign_media.api.models.VoPlaylists;
 import com.victormugo.nsign_media.api.models.VoResource;
+import com.victormugo.nsign_media.bus.IntentServiceResult;
 import com.victormugo.nsign_media.utils.Utils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -81,14 +83,23 @@ public class LoadMediaData extends Service {
             Log.d(Core.TAG, "-------------------> backGround Service is running .....");
 
             // Lectura de los objetos
-            VoResource resource = Utils.loadNextMediaFile(voMedia);
+            IntentServiceResult intentServiceResult = Utils.loadNextMediaFile(voMedia);
 
-            Log.d(Core.TAG, "-----------> resource: " + resource);
-            Log.d(Core.TAG, "-----------> duration: " + resource.getDuration());
+            if (intentServiceResult != null) {
 
-            EventBus.getDefault().post(resource);
+                Log.d(Core.TAG, "-----------> resource: " + intentServiceResult.getResource().getName());
+                Log.d(Core.TAG, "-----------> duration: " + intentServiceResult.getResource().getDuration());
 
-            reScheduleTimer(resource.getDuration());
+                // Enviar a la actividad principal el recurso a mostrar
+                //EventBus.getDefault().post(resource);
+                EventBus.getDefault().post(intentServiceResult);
+
+                // Reprogramar el timertask para el siguiente recurso
+                reScheduleTimer(intentServiceResult.getResource().getDuration());
+
+            } else {
+                stopForeground(true);
+            }
         }
     }
 
