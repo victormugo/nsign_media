@@ -2,4 +2,6 @@
     <string name="app_name">nsign_media</string>
 
     <string name="async_notifications_message">Mensaje</string>
+    <string name="image_content">Imagen</string>
+    <string name="message_loading_content">Cargando contenido ...</string>
 </resources>

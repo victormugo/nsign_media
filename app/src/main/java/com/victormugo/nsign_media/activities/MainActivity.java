@@ -29,7 +29,10 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Log.d(Core.TAG, "onCreate");
+        Log.d(Core.TAG, "-------------> entra en el onCreate");
+
+        binding.loading.setVisibility(View.VISIBLE);
+
 
         // Verficar existencia del fichero
 
@@ -45,43 +48,40 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d(Core.TAG, "onRestart");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(Core.TAG, "onStart");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(Core.TAG, "onResume");
+
+        // Registrar tunel entre background y foreground
         EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(Core.TAG, "onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(Core.TAG, "onStop");
 
         // Finalizar servicio
         Core.finishService(getBaseContext(), LoadMediaData.class);
 
+        // Finalizar tunel entre background y foreground
         EventBus.getDefault().unregister(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(Core.TAG, "onDestroy");
     }
 
     @Subscribe
@@ -89,11 +89,17 @@ public class MainActivity extends AppCompatActivity {
 
         runOnUiThread(() -> {
 
+            Log.d(Core.TAG, "-----------------> Entra en onEvent");
+            binding.loading.setVisibility(View.GONE);
+
             // Saber si es png o mp4
             String[] separated = intentServiceResult.getResource().getName().split("\\.");
+
             if (separated[1].equals(Core.image)) {
-                // ------ ES IMAGEN
-                // Esconder el binding del video
+                // ------ IMAGEN ------
+
+                // Esconder vista del video
+                // Mostrar vista de imagen
                 binding.videoMedia.setVisibility(View.GONE);
                 binding.imageMedia.setVisibility(View.VISIBLE);
 
@@ -118,21 +124,20 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else if (separated[1].equals(Core.video)) {
-                // ------ ES VIDEO
-                // Esconder el binding de la imagen
+                // ------ VIDEO ------
+
+                // Esconder vista de la imagen
+                // Mostrar vista del video
                 binding.videoMedia.setVisibility(View.VISIBLE);
                 binding.imageMedia.setVisibility(View.GONE);
 
                 try {
                     Log.d(Core.TAG, "------------------> intentServiceResult.getResource().getName()).toString(): " + intentServiceResult.getResource().getName());
 
-                    String name = intentServiceResult.getResource().getName();
-                    name = name.toLowerCase();
+                    String name = separated[0];
 
-                    // name = name.replace(" ", "");
-
-                    String[] firstName = name.split(" ");
-                    name = firstName[0];
+                    name = name.toLowerCase(); // Cambiar todas las letras a minusculas
+                    name = name.replace(" ", "_"); // Cambiar todos los espacios en blanco a _
 
                     Log.d(Core.TAG, "------------------> name: " + name);
 
@@ -151,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                     binding.videoMedia.start();
 
                 } catch (Exception e) {
+                    Log.d(Core.TAG, "-------------> e: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
