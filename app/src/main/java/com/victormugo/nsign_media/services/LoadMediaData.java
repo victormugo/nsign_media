@@ -57,6 +57,7 @@ public class LoadMediaData extends Service {
             // Fichero existe
             existsFile = true;
         }
+        Log.d(Core.TAG, "-------------------------> fichero existe: " + existsFile);
 
         if (!existsFile) {
             // Fichero NO existe, se solicita al servidor mediante petición API

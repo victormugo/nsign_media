@@ -18,8 +18,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.MediaController;
-import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.victormugo.nsign_media.R;
 import com.victormugo.nsign_media.bus.IntentServiceResult;
 import com.victormugo.nsign_media.databinding.ActivityMainBinding;
@@ -35,6 +35,7 @@ import java.io.InputStream;
 public class MainActivity extends AppCompatActivity {
 
     private static final int STORAGE_PERMISSION_CODE = 7;
+    private MaterialDialog dialog;
 
     private ActivityMainBinding binding;
 
@@ -59,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
         Log.d(Core.TAG, "-------------> entra en el onStart");
 
         // Mostrar loading mientras se cargan los recursos
-        binding.loading.setVisibility(View.VISIBLE);
+        //binding.loading.setVisibility(View.VISIBLE);
+        dialog = Dialogs.showDialogProgress(getString(R.string.message_loading_content), MainActivity.this).build();
+        if (dialog != null) dialog.show();
 
         binding.imageMedia.setVisibility(View.GONE);
         binding.videoMedia.setVisibility(View.GONE);
@@ -110,7 +113,8 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
                 Dialogs.showMaterialDialog(getString(R.string.permission_storage_denied), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
-                binding.loading.setVisibility(View.GONE);
+                // binding.loading.setVisibility(View.GONE);
+                if (dialog != null) dialog.dismiss();
             }
         }
     }
@@ -162,7 +166,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // Mostrar mensaje al usuario de que si acepta el permiso, la aplicación no puede continuar
                 Dialogs.showMaterialDialog(getString(R.string.permission_storage_denied), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
-                binding.loading.setVisibility(View.GONE);
+
+                // binding.loading.setVisibility(View.GONE);
+                if (dialog != null) dialog.dismiss();
             }
         }
     });
@@ -201,7 +207,8 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(() -> {
 
             Log.d(Core.TAG, "-----------------> Entra en onEvent");
-            binding.loading.setVisibility(View.GONE);
+            // binding.loading.setVisibility(View.GONE);
+            if (dialog != null) dialog.dismiss();
 
             // Saber si es png o mp4
             String[] separated = intentServiceResult.getResource().getName().split("\\.");

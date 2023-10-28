@@ -26,19 +26,4 @@
 
     </LinearLayout>
 
-    <com.pnikosis.materialishprogress.ProgressWheel
-        android:id="@+id/loading"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="24dp"
-        android:gravity="center"
-        android:visibility="gone"
-        android:text="@string/message_loading_content"
-        app:layout_anchor="@id/media_box"
-        app:layout_anchorGravity="center"
-        wheel:matProg_barColor="@color/color_primary"
-        wheel:matProg_barWidth="5dp"
-        wheel:matProg_fillRadius="false"
-        wheel:matProg_progressIndeterminate="true" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
