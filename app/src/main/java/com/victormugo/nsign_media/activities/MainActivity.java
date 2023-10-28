@@ -33,6 +33,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -275,9 +276,9 @@ public class MainActivity extends AppCompatActivity {
 
                     InputStream inputstream;
                     try {
-                        inputstream = getApplicationContext().getAssets().open(intentServiceResult.getResource().getName());
-                        // String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
-                        // inputstream = new FileInputStream(path);
+                        // inputstream = getApplicationContext().getAssets().open(intentServiceResult.getResource().getName());
+                        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
+                        inputstream = new FileInputStream(path);
                         Drawable drawable = Drawable.createFromStream(inputstream, null);
 
                         binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
@@ -314,9 +315,9 @@ public class MainActivity extends AppCompatActivity {
                         MediaController mediaController = new MediaController(this);
                         binding.videoMedia.setMediaController(mediaController);
 
-                        // String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
+                        String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
 
-                        String fileName = "android.resource://" + getPackageName() + "/" + R.raw.video_test_1;
+                        // String fileName = "android.resource://" + getPackageName() + "/" + R.raw.video_test_1;
 
                         Log.d(Core.TAG, "------------------> fileName: " + fileName);
                         binding.videoMedia.setVideoURI(Uri.parse(fileName));
