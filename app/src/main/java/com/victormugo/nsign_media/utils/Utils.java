@@ -4,9 +4,9 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
-import com.github.junrar.Archive;
+import com.github.junrar.Junrar;
 import com.github.junrar.exception.RarException;
-import com.github.junrar.volume.FileVolumeManager;
+import com.github.junrar.exception.UnsupportedRarV5Exception;
 import com.google.gson.Gson;
 import com.victormugo.nsign_media.activities.Core;
 import com.victormugo.nsign_media.api.models.VoMedia;
@@ -36,9 +36,9 @@ public class Utils {
         String json;
 
         try {
-            InputStream is = context.getAssets().open(Core.JSON_FILE);
-            // String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.JSON_FILE;  // fist part gets the directory of download folder and last part is your file name
-            // InputStream is = new BufferedInputStream(new FileInputStream(path));
+            // InputStream is = context.getAssets().open(Core.JSON_FILE);
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.JSON_FILE;  // fist part gets the directory of download folder and last part is your file name
+            InputStream is = new BufferedInputStream(new FileInputStream(path));
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -198,7 +198,7 @@ public class Utils {
                 // Descomprimir fichero
                 File rar = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
                 // final File rar = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
-                //Log.d(Core.TAG, "------------------> rar: " + rar);
+                Log.d(Core.TAG, "------------------> rar: " + rar);
 
                 File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator);
                 // final File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator);
@@ -206,6 +206,8 @@ public class Utils {
 
                 // TODO
                 // ExtractArchive.extractArchive(rar, destinationFolder);
+
+                // Junrar.extract("/storage/emulated/0/Download/NSIGN_Prueba_Android.rar", "/storage/emulated/0/Download");
 
                 return true;
 
@@ -215,10 +217,12 @@ public class Utils {
             }
             /*catch (RarException e) {
                 Log.d(Core.TAG, "-------------------> e main: " + e.getMessage());
+                e.printStackTrace();
                 return false;
 
             }*/
             finally {
+
                 if (inputStream != null) {
                     inputStream.close();
                 }

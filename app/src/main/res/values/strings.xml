@@ -5,7 +5,13 @@
     <string name="image_content">Imagen</string>
     <string name="message_loading_content">Cargando contenido</string>
     <string name="permission_storage_denied">Permiso de Almacén denegado.\nEs necesario activarlo para el correcto funcionamiento de la aplicación.\n\nReinice la aplicación para activar el permiso solicitado.</string>
-
-    <string name="file_config_not_exists">Fichero de configuración no encontrado.\nCierre la aplicación y contacte con su administrador.</string>
+    <string name="file_config_not_exists">Fichero de configuración no encontrado.\nSeguir los siguientes pasos para finalizar la configuración:\n\n
+        1.- Acceder a play store y descargar la aplicación WINRAR.\n
+        2.- Abrir la aplicación Mis archivos (o en su defecto una aplicación de gestión de ficheros del dispositivo).\n
+        3.- Acceder a la carpeta DOWNLOAD en la memoria interna del dispositivo.\n
+        4.- Descomprimir el fichero NSIGN_Prueba_Android.rar.\n
+        5.- Los ficheros descomprimidos se tienen que almacenar en la carpeta DOWNLOAD en la memoria interna del dispositivo.
+    </string>
+    <string name="file_config_not_descompressed">Fichero de configuración descargado pero NO descomprimido.\n\nTiene que descomprimir el fichero NSIGN_Prueba_Android.rar con la aplicación WINRAR en la carpeta DOWNLOAD.\n\n</string>
     <string name="file_media_not_exists">Fichero de contenido no encontrado.</string>
 </resources>

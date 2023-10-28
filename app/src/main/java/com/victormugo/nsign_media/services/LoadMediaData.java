@@ -49,7 +49,7 @@ public class LoadMediaData extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground();
 
-        boolean existsFile = false;
+       boolean existsFile = false;
 
         // Verificar si fichero existe
         File futureStudioIconFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
@@ -92,9 +92,10 @@ public class LoadMediaData extends Service {
 
         } else {
             // Fichero SI existe
-
             activateServiceData();
         }
+
+        activateServiceData();
 
         return super.onStartCommand(intent, flags, startId);
     }
