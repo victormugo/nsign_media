@@ -118,7 +118,7 @@ public class LoadMediaData extends Service {
     public void activateServiceData() {
 
         // Cargar datos del fichero Assets en las clases correspondientes
-        voMedia = Utils.loadJSONFromAsset();
+        voMedia = Utils.loadJSONFromAsset(getApplicationContext());
 
         if (voMedia != null) {
             // Ejecutar el timerTask

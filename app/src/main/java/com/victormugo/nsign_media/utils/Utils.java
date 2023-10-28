@@ -1,8 +1,12 @@
 package com.victormugo.nsign_media.utils;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
+import com.github.junrar.Archive;
+import com.github.junrar.exception.RarException;
+import com.github.junrar.volume.FileVolumeManager;
 import com.google.gson.Gson;
 import com.victormugo.nsign_media.activities.Core;
 import com.victormugo.nsign_media.api.models.VoMedia;
@@ -27,14 +31,14 @@ public class Utils {
      * Método para realizar la lectura del fichero events.json
      * @return VoMedia a partir del JSON events.json
      */
-    public static VoMedia loadJSONFromAsset() {
+    public static VoMedia loadJSONFromAsset(Context context) {
         VoMedia voMedia;
         String json;
 
         try {
-            // InputStream is = context.getAssets().open(Core.JSON_FILE);
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.JSON_FILE;  // fist part gets the directory of download folder and last part is your file name
-            InputStream is = new BufferedInputStream(new FileInputStream(path));
+            InputStream is = context.getAssets().open(Core.JSON_FILE);
+            // String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.JSON_FILE;  // fist part gets the directory of download folder and last part is your file name
+            // InputStream is = new BufferedInputStream(new FileInputStream(path));
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -151,7 +155,7 @@ public class Utils {
         for (int i = 0 ; i<voMedia.getPlaylists().size(); i++) {
             VoPlaylists voPlaylists = voMedia.getPlaylists().get(i);
 
-            for (int j = 0; j < voMedia.getPlaylists().get(i).getResources().size(); j++) {
+            for (int j = 0; j < voPlaylists.getResources().size(); j++) {
                 VoResource voResource = voPlaylists.getResources().get(j);
                 voResource.setDone(false);
             }
@@ -192,21 +196,29 @@ public class Utils {
                 outputStream.flush();
 
                 // Descomprimir fichero
-                final File rar = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
-                Log.d(Core.TAG, "------------------> rar: " + rar);
+                File rar = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
+                // final File rar = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
+                //Log.d(Core.TAG, "------------------> rar: " + rar);
 
-                final File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator);
-                Log.d(Core.TAG, "-------------------> destinationFolder: " + destinationFolder);
+                File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator);
+                // final File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator);
+                //Log.d(Core.TAG, "-------------------> destinationFolder: " + destinationFolder);
 
                 // TODO
-                // Junrar.extract(rar, destinationFolder);
+                // ExtractArchive.extractArchive(rar, destinationFolder);
 
                 return true;
 
             } catch (IOException e) {
                 return false;
 
-            } finally {
+            }
+            /*catch (RarException e) {
+                Log.d(Core.TAG, "-------------------> e main: " + e.getMessage());
+                return false;
+
+            }*/
+            finally {
                 if (inputStream != null) {
                     inputStream.close();
                 }
@@ -220,5 +232,4 @@ public class Utils {
             return false;
         }
     }
-
 }

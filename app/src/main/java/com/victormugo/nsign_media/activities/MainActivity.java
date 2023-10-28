@@ -271,8 +271,9 @@ public class MainActivity extends AppCompatActivity {
 
                     InputStream inputstream;
                     try {
-                        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
-                        inputstream = new FileInputStream(path);
+                        inputstream = getApplicationContext().getAssets().open(intentServiceResult.getResource().getName());
+                        // String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
+                        // inputstream = new FileInputStream(path);
                         Drawable drawable = Drawable.createFromStream(inputstream, null);
 
                         binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
@@ -306,24 +307,21 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         Log.d(Core.TAG, "------------------> intentServiceResult.getResource().getName()).toString(): " + intentServiceResult.getResource().getName());
 
-                        String name = separated[0];
-
-                        name = name.toLowerCase(); // Cambiar todas las letras a minusculas
-                        name = name.replace(" ", "_"); // Cambiar todos los espacios en blanco a _
-
-                        Log.d(Core.TAG, "------------------> name: " + name);
-
                         MediaController mediaController = new MediaController(this);
                         binding.videoMedia.setMediaController(mediaController);
-                        String fileName = "android.resource://" + getPackageName() + "/raw/" + name;
+
+                        // String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + intentServiceResult.getResource().getName();
+
+                        String fileName = "android.resource://" + getPackageName() + "/" + R.raw.video_test_1;
+
                         Log.d(Core.TAG, "------------------> fileName: " + fileName);
                         binding.videoMedia.setVideoURI(Uri.parse(fileName));
 
-                        binding.imageMedia.getLayoutParams().width = intentServiceResult.getWidth();
-                        binding.imageMedia.getLayoutParams().height = intentServiceResult.getHeigh();
+                        binding.videoMedia.getLayoutParams().width = intentServiceResult.getWidth();
+                        binding.videoMedia.getLayoutParams().height = intentServiceResult.getHeigh();
 
-                        binding.imageMedia.setX(intentServiceResult.getX());
-                        binding.imageMedia.setY(intentServiceResult.getY());
+                        binding.videoMedia.setX(intentServiceResult.getX());
+                        binding.videoMedia.setY(intentServiceResult.getY());
 
                         binding.videoMedia.start();
 
@@ -333,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 } else {
+                    // ---------- DESCONOCIDO ---------
                     // Formato o fichero events no reconocido
                     Dialogs.showMaterialDialog(getString(R.string.file_media_not_exists), getString(R.string.app_name), (dialog, which) -> dialog.dismiss(), false, MainActivity.this);
                 }
