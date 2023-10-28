@@ -11,7 +11,8 @@ public class Core {
 
     public static final String image = "png";
     public static final String video = "mp4";
-    public static final String URL_FILE  = "https://media.nsign.tv/media/NSIGN_Prueba_Android.rar";
+    public static final String URL_FILE  = "https://media.nsign.tv/media/";
+    public static final String FILE_NAME = "NSIGN_Prueba_Android.rar";
 
     public static void activateService(Context context, Class<?> className) {
         boolean isRunning = isMyServiceRunning(className, context);

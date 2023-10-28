@@ -9,24 +9,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.victormugo.nsign_media.R;
 import com.victormugo.nsign_media.activities.Core;
 import com.victormugo.nsign_media.activities.MainActivity;
+import com.victormugo.nsign_media.api.Api;
 import com.victormugo.nsign_media.api.models.VoMedia;
-import com.victormugo.nsign_media.api.models.VoPlaylists;
-import com.victormugo.nsign_media.api.models.VoResource;
 import com.victormugo.nsign_media.bus.IntentServiceResult;
 import com.victormugo.nsign_media.utils.Utils;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class LoadMediaData extends Service {
 
@@ -35,19 +43,55 @@ public class LoadMediaData extends Service {
 
     public VoMedia voMedia = null;
 
-    public LoadMediaData() {
-    }
+    public LoadMediaData() { }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground();
 
-        // Cargar datos del fichero Assets en las clases correspondientes
-        voMedia = Utils.loadJSONFromAsset(getBaseContext());
+        boolean existsFile = false;
 
-        // Ejecutar el timerTask
-        Log.d(Core.TAG, "-------------------> voMedia.getPlaylists().get(0).getResources().get(0).getDuration(): " + voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
-        reScheduleTimer(voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
+        // Verificar si fichero existe
+        File futureStudioIconFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + Core.FILE_NAME);
+        if (futureStudioIconFile.exists()) {
+            // Fichero existe
+            existsFile = true;
+        }
+
+        if (!existsFile) {
+            // Fichero NO existe, se solicita al servidor mediante petición API
+
+            // Si no existe --> Descargar petición api
+            Retrofit.Builder builder = new Retrofit.Builder()
+                    .baseUrl(Core.URL_FILE);
+
+            Retrofit retrofit = builder.build();
+
+            Api api = retrofit.create(Api.class);
+
+            Call<ResponseBody> call = api.loadFile();
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    Log.d(Core.TAG, "---------------------------> response: " + response);
+
+                    boolean resp = Utils.writeResponseBodyToDisk(getApplicationContext(), response.body());
+                    Log.d(Core.TAG, "--------------------------> resp: " + resp);
+
+                    activateServiceData();
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    Log.d(Core.TAG, "-----------------------> t: " + t.getMessage());
+                }
+            });
+
+        } else {
+            // Fichero SI existe
+
+            activateServiceData();
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -64,6 +108,18 @@ public class LoadMediaData extends Service {
         if (_timer != null) _timer.cancel();
 
         stopForeground(true);
+
+        Log.d(Core.TAG, "---------------> onDestroy del servicio");
+    }
+
+    public void activateServiceData() {
+
+        // Cargar datos del fichero Assets en las clases correspondientes
+        voMedia = Utils.loadJSONFromAsset(getBaseContext());
+
+        // Ejecutar el timerTask
+        Log.d(Core.TAG, "-------------------> voMedia.getPlaylists().get(0).getResources().get(0).getDuration(): " + voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
+        reScheduleTimer(voMedia.getPlaylists().get(0).getResources().get(0).getDuration());
     }
 
     public void reScheduleTimer(long duration) {
