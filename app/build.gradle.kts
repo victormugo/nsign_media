@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace = "com.victormugo.nsign_media"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.victormugo.nsign_media"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -22,12 +22,10 @@ import android.widget.MediaController;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.victormugo.nsign_media.R;
-import com.victormugo.nsign_media.api.Api;
 import com.victormugo.nsign_media.bus.IntentServiceResult;
 import com.victormugo.nsign_media.databinding.ActivityMainBinding;
 import com.victormugo.nsign_media.services.LoadMediaData;
 import com.victormugo.nsign_media.utils.Dialogs;
-import com.victormugo.nsign_media.utils.Utils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -36,12 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
 
